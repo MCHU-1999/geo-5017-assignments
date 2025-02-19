@@ -61,7 +61,7 @@ class Degree1(Model):
         assert len(x) == len(y)
 
         n = len(x)
-        self.D = np.array([ np.full(n, 1), np.arange(1, n+1) ], dtype=float).transpose()
+        self.D = np.array([np.full(n, 1), np.arange(1, n+1) ], dtype=float).transpose()
         self.error = sum((y - np.dot(self.D, self.A))**2)
         i = 0
         while i < iter:
@@ -72,12 +72,15 @@ class Degree1(Model):
             # Compute error (squared error)
             y_pred = np.dot(self.D, self.A)
             error = np.sum((y - y_pred) ** 2)
+            print(f"Residual error at iteration {i}: {error}")
             self.error_arr.append(error)
 
             # Check for convergence
             if i > 0 and abs(self.error_arr[-1] - self.error_arr[-2]) < ct and self.convergence_iter is None:
                 self.convergence_iter = i  # Store the convergence iteration
             i += 1
+
+        print(f"Sum of the residual errors: {sum(self.error_arr)}")
            
         # If no convergence detected based on threshold, mark last iteration as convergence
         if self.convergence_iter is None:
@@ -93,8 +96,8 @@ class Degree1(Model):
             param_values = self.coef_arr[self.convergence_iter]
             param_text = f'Params:\n{param_values}'
             plt.annotate(f'Converged\nIter: {self.convergence_iter}\n{param_text}', 
-                        xy=(self.convergence_iter, self.error_arr[self.convergence_iter]), 
-                        xytext=(self.convergence_iter + 2, self.error_arr[self.convergence_iter] * 1.1),
+                        xy=(self.convergence_iter, self.error_arr[self.convergence_iter]),
+                        xytext=(self.convergence_iter - 2, self.error_arr[self.convergence_iter] * 1.1),
                         arrowprops=dict(arrowstyle='->', lw=1.5, color='red'),
                         fontsize=10, color='red')
 
@@ -139,6 +142,10 @@ class Degree2(Model):
 
         return gradient
 
+    def predict(self, t: float) -> np.ndarray:
+        "Part c: This function will predict the next position of the drone at t=7."
+        return self.A[0] + self.A[1] * t + self.A[2] * (t**2)
+
     def fit(self, x: np.ndarray, y: np.ndarray, lr: int, iter: int, ct: float):
         assert len(x) == len(y)
 
@@ -156,12 +163,15 @@ class Degree2(Model):
             y_pred = np.dot(self.D, self.A)
             # print("y_pred:\n", y_pred)
             error = np.sum((y - y_pred) ** 2)
+            print(f"Residual error at iteration {i}: {error}")
             self.error_arr.append(error)
 
             # Check for convergence
             if i > 0 and abs(self.error_arr[-1] - self.error_arr[-2]) < ct and self.convergence_iter is None:
                 self.convergence_iter = i  # Store the convergence iteration
             i += 1
+
+        print(sum(self.error_arr))
            
         # If no convergence detected based on threshold, mark last iteration as convergence
         if self.convergence_iter is None:
@@ -224,4 +234,6 @@ if __name__ == "__main__":
         model = Degree2()
 
     model.fit(T, DATA_T, lr, iter, ct)
+    predicted_position = model.predict(7)
+    print(f"Predicted position at t=7: {predicted_position}")
     model.plot()
