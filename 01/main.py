@@ -154,14 +154,12 @@ class Degree2(Model):
         self.error = sum((y - np.dot(self.D, self.A))**2)
         i = 0
         while i < iter:
-            # print("iter:", i)
             self.gradient = self.cal_grad(x, y)
             self.A = self.A - lr * self.gradient
             self.coef_arr.append(self.A)
 
             # Compute error (squared error)
             y_pred = np.dot(self.D, self.A)
-            # print("y_pred:\n", y_pred)
             error = np.sum((y - y_pred) ** 2)
             print(f"Residual error at iteration {i}: {error}")
             self.error_arr.append(error)
