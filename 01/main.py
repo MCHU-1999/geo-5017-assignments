@@ -57,7 +57,7 @@ class Degree1(Model):
         #     ]
         # ])
 
-    def fit(self, x: np.ndarray, y: np.ndarray, lr: int, iter: int, ct: float):
+    def fit(self, x: np.ndarray, y: np.ndarray, lr: int, iter: int, ct: float|None):
         assert len(x) == len(y)
 
         n = len(x)
@@ -76,14 +76,14 @@ class Degree1(Model):
             self.error_arr.append(error)
 
             # Check for convergence
-            if i > 0 and abs(self.error_arr[-1] - self.error_arr[-2]) < ct and self.convergence_iter is None:
+            if ct is not None and i > 0 and abs(self.error_arr[-1] - self.error_arr[-2]) < ct and self.convergence_iter is None:
                 self.convergence_iter = i  # Store the convergence iteration
             i += 1
 
         print(f"Sum of the residual errors: {sum(self.error_arr)}")
-           
+
         # If no convergence detected based on threshold, mark last iteration as convergence
-        if self.convergence_iter is None:
+        if ct is not None and self.convergence_iter is None:
             self.convergence_iter = iter - 1
 
     def plot(self, convergence_threshold=None):
@@ -146,7 +146,7 @@ class Degree2(Model):
         "Part c: This function will predict the next position of the drone at t=7."
         return self.A[0] + self.A[1] * t + self.A[2] * (t**2)
 
-    def fit(self, x: np.ndarray, y: np.ndarray, lr: int, iter: int, ct: float):
+    def fit(self, x: np.ndarray, y: np.ndarray, lr: int, iter: int, ct: float|None):
         assert len(x) == len(y)
 
         n = len(x)
@@ -165,14 +165,14 @@ class Degree2(Model):
             self.error_arr.append(error)
 
             # Check for convergence
-            if i > 0 and abs(self.error_arr[-1] - self.error_arr[-2]) < ct and self.convergence_iter is None:
+            if ct is not None and i > 0 and abs(self.error_arr[-1] - self.error_arr[-2]) < ct and self.convergence_iter is None:
                 self.convergence_iter = i  # Store the convergence iteration
             i += 1
 
         print(sum(self.error_arr))
-           
+
         # If no convergence detected based on threshold, mark last iteration as convergence
-        if self.convergence_iter is None:
+        if ct is not None and self.convergence_iter is None:
             self.convergence_iter = iter - 1
 
     def plot(self, convergence_threshold=None):
@@ -212,7 +212,7 @@ if __name__ == "__main__":
     parser.add_argument("-lr", "--learning_rate", type=float, help="Set the learning rate", required=True, default=0.01)
     parser.add_argument("-it", "--iterations", type=int, help="Set the max iteration number", required=True, default=20)
     parser.add_argument("-d", "--degree", type=int, help="Set the degree for the polynomial model", choices=[1, 2], required=True, default=1)
-    parser.add_argument("-ct", "--convergence_threshold", type=float, help="Set the convergence threshold", default=1e-5)
+    parser.add_argument("-ct", "--convergence_threshold", type=float, help="Set the convergence threshold (optional)", default=None)
     
     # Parse arguments
     args = parser.parse_args()
@@ -225,6 +225,8 @@ if __name__ == "__main__":
     print(f"Learning Rate: {lr}")
     print(f"Iterations: {iter}")
     print(f"Degree: {deg}")
+    if ct is not None:
+        print(f"Convergence Threshold: {ct}")
 
     if deg == 1:
         model = Degree1()
