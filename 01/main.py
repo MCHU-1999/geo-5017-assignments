@@ -72,15 +72,13 @@ class Degree1(Model):
             # Compute error (squared error)
             y_pred = np.dot(self.D, self.A)
             error = np.sum((y - y_pred) ** 2)
-            print(f"Residual error at iteration {i}: {error}")
+            # print(f"Residual error at iteration {i}: {error}")
             self.error_arr.append(error)
 
             # Check for convergence
             if ct is not None and i > 0 and abs(self.error_arr[-1] - self.error_arr[-2]) < ct and self.convergence_iter is None:
                 self.convergence_iter = i  # Store the convergence iteration
             i += 1
-
-        print(f"Sum of the residual errors: {sum(self.error_arr)}")
 
         # If no convergence detected based on threshold, mark last iteration as convergence
         if ct is not None and self.convergence_iter is None:
@@ -161,15 +159,13 @@ class Degree2(Model):
             # Compute error (squared error)
             y_pred = np.dot(self.D, self.A)
             error = np.sum((y - y_pred) ** 2)
-            print(f"Residual error at iteration {i}: {error}")
+            # print(f"Residual error at iteration {i}: {error}")
             self.error_arr.append(error)
 
             # Check for convergence
             if ct is not None and i > 0 and abs(self.error_arr[-1] - self.error_arr[-2]) < ct and self.convergence_iter is None:
                 self.convergence_iter = i  # Store the convergence iteration
             i += 1
-
-        print(sum(self.error_arr))
 
         # If no convergence detected based on threshold, mark last iteration as convergence
         if ct is not None and self.convergence_iter is None:
