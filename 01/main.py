@@ -62,7 +62,7 @@ class Degree1(Model):
         "This function will predict the next position of the drone at t=7."
         return self.A[0] + self.A[1] * t
 
-    def fit(self, x: np.ndarray, y: np.ndarray, lr: int, iter: int, ct: float|None):
+    def fit(self, x: np.ndarray, y: np.ndarray, lr: int, iter: int, ct: float):
         assert len(x) == len(y)
 
         n = len(x)
@@ -77,7 +77,7 @@ class Degree1(Model):
             # Compute error (squared error)
             y_pred = np.dot(self.D, self.A)
             error = np.sum((y - y_pred) ** 2)
-            print(f"Residual error at iteration {i}: {error}")
+            # print(f"Residual error at iteration {i}: {error}")
             self.error_arr.append(error)
 
             # Check for convergence
@@ -85,64 +85,94 @@ class Degree1(Model):
                 self.convergence_iter = i  # Store the convergence iteration
             i += 1
 
-           
         # If no convergence detected based on threshold, mark last iteration as convergence
         if self.convergence_iter is None:
             self.convergence_iter = iter - 1
-        
-        
 
-    def plot(self, convergence_threshold=None):
+    def plot_fitting(self):
         plt.figure(figsize=(12, 6))
         plt.plot(range(1, len(self.error_arr) + 1), self.error_arr, marker='o', linestyle='-', color='b', label="Error")
 
-        if hasattr(self, "convergence_iter") and self.convergence_iter is not None:
-            plt.axvline(self.convergence_iter + 1, color='r', linestyle='--', label=f'Converged at {self.convergence_iter + 1}')
+        if self.convergence_iter < len(self.error_arr)-1:
+            plt.axvline(self.convergence_iter + 1, color='r', linestyle='--', label=f'Converged at {self.convergence_iter+1}')
+        else: 
+            plt.axvline(len(self.error_arr), color='r', linestyle='--', label=f'Last iteration')
 
-            # Extract parameter values
-            param_values = self.coef_arr[self.convergence_iter]
-            alpha0, beta0, gamma0 = param_values[0]
-            alpha1, beta1, gamma1 = param_values[1]
+        # Extract parameter values
+        param_values = self.coef_arr[self.convergence_iter]
+        alpha0, beta0, gamma0 = param_values[0]
+        alpha1, beta1, gamma1 = param_values[1]
 
-            # Compute velocity (since degree 1 is constant velocity)
-            velocity_x, velocity_y, velocity_z = alpha1, beta1, gamma1 
+        # Compute velocity (since degree 1 is constant velocity)
+        velocity_x, velocity_y, velocity_z = alpha1, beta1, gamma1 
 
-            # Get residual error at convergence iteration
-            residual_error = self.error_arr[self.convergence_iter]
+        # Get residual error at convergence iteration
+        residual_error = self.error_arr[self.convergence_iter]
 
-            # Prepare annotation text
-            param_text = (f'Converged\nIter: {self.convergence_iter + 1}\n'
-                        f'Residual Error: {residual_error:.6f}\n'
-                        f'Params:\n'
-                        f'$\\alpha_0$: {alpha0:.3f}, $\\alpha_1$: {alpha1:.3f}\n'
-                        f'$\\beta_0$: {beta0:.3f}, $\\beta_1$: {beta1:.3f}\n'
-                        f'$\\gamma_0$: {gamma0:.3f}, $\\gamma_1$: {gamma1:.3f}\n'
-                        f'Velocity:\n'
-                        f'$v_x$: {velocity_x:.3f}, $v_y$: {velocity_y:.3f}, $v_z$: {velocity_z:.3f}')
+        # Prepare annotation text
+        param_text = (f'Iter: {self.convergence_iter + 1}\n'
+                    f'Residual Error: {residual_error:.6f}\n'
+                    f'Params:\n'
+                    f'$\\alpha_0$: {alpha0:.3f}, $\\alpha_1$: {alpha1:.3f}\n'
+                    f'$\\beta_0$: {beta0:.3f}, $\\beta_1$: {beta1:.3f}\n'
+                    f'$\\gamma_0$: {gamma0:.3f}, $\\gamma_1$: {gamma1:.3f}\n'
+                    f'Velocity:\n'
+                    f'$v_x$: {velocity_x:.3f}, $v_y$: {velocity_y:.3f}, $v_z$: {velocity_z:.3f}')
 
-            # Set position for annotation text
-            x_pos = max(self.convergence_iter - 5, 1)  
-            y_pos = residual_error * 1.1  # Adjust vertical position of the text
+        # Set position for annotation text
+        x_pos = max(self.convergence_iter - 5, 1)  
+        y_pos = residual_error * 1.1  # Adjust vertical position of the text
 
-            # Annotate with arrow
-            plt.annotate(param_text, 
-                        xy=(self.convergence_iter + 1, residual_error), 
-                        xytext=(x_pos, y_pos), 
-                        arrowprops=dict(arrowstyle='->', lw=1.5, color='red'),
-                        fontsize=10, color='red', 
-                        bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5', alpha=0.85),
-                        ha='right')
+        # Annotate with arrow
+        plt.annotate(param_text, 
+                    xy=(self.convergence_iter + 1, residual_error), 
+                    xytext=(x_pos, y_pos), 
+                    arrowprops=dict(arrowstyle='->', lw=1.5, color='red'),
+                    fontsize=10, color='red', 
+                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5', alpha=0.85),
+                    ha='right')
 
         plt.xlabel('Iteration')
         plt.ylabel('Error (Squared Error)')
-        plt.title('Error vs. Iterations')
-
-        # Show convergence threshold if provided
-        if convergence_threshold:
-            plt.axhline(convergence_threshold, color='g', linestyle=':', label=f'Threshold {convergence_threshold}')
-        
+        plt.title('Error vs. Iterations')        
         plt.legend()
         plt.grid(True)
+        plt.savefig(f"{os.getcwd()}/fitting_deg1.png")
+        print("file has been save to: fitting_deg1.png")
+        plt.show()
+
+    def plot_result(self, y:np.ndarray):
+        fig = plt.figure(figsize=(10, 8))
+        ax = fig.add_subplot(111, projection='3d')
+
+        y_pred = np.dot(self.D, self.coef_arr[self.convergence_iter])
+        errors = np.linalg.norm(y - y_pred, axis=1)
+
+        # Plot error lines first to ensure visibility
+        for i in range(len(y)):
+            ax.plot([y[i, 0], y_pred[i, 0]],
+                    [y[i, 1], y_pred[i, 1]],
+                    [y[i, 2], y_pred[i, 2]],
+                    'k--', alpha=0.8, label='Error' if i == 0 else "")
+
+            # Add error values as text
+            mid_x = (y[i, 0] + y_pred[i, 0]) / 2
+            mid_y = (y[i, 1] + y_pred[i, 1]) / 2
+            mid_z = (y[i, 2] + y_pred[i, 2]) / 2
+            ax.text(mid_x, mid_y, mid_z, f'{errors[i]:.2f}', color='black', fontsize=8)
+
+        # Plot actual and estimated trajectories
+        ax.plot(y[:, 0], y[:, 1], y[:, 2], 'o-', label='Actual Trajectory')
+        ax.plot(y_pred[:, 0], y_pred[:, 1], y_pred[:, 2], 'o-', label='Estimated Trajectory')
+
+        # Labels and title
+        ax.set_xlabel('X Coordinate')
+        ax.set_ylabel('Y Coordinate')
+        ax.set_zlabel('Z Coordinate')
+        ax.set_title('Actual vs Estimated Trajectory with Errors')
+        ax.legend()
+        plt.savefig(f"{os.getcwd()}/prediction_deg1.png")
+        print("file has been save to: prediction_deg1.png")
         plt.show()
 
 class Degree2(Model):
@@ -192,75 +222,108 @@ class Degree2(Model):
             # Compute error (squared error)
             y_pred = np.dot(self.D, self.A)
             error = np.sum((y - y_pred) ** 2)
-            print(f"Residual error at iteration {i}: {error}")
+            # print(f"Residual error at iteration {i}: {error}")
             self.error_arr.append(error)
 
             # Check for convergence
             if i > 0 and abs(self.error_arr[-1] - self.error_arr[-2]) < ct and self.convergence_iter is None:
                 self.convergence_iter = i  # Store the convergence iteration
             i += 1
-
-        print(sum(self.error_arr))
            
         # If no convergence detected based on threshold, mark last iteration as convergence
         if self.convergence_iter is None:
             self.convergence_iter = iter - 1
 
-    def plot(self, convergence_threshold=None):
+    def plot_fitting(self):
         plt.figure(figsize=(12, 6))
         plt.plot(range(1, len(self.error_arr) + 1), self.error_arr, marker='o', linestyle='-', color='b', label="Error")
 
-        if hasattr(self, "convergence_iter") and self.convergence_iter is not None:
+        if self.convergence_iter < len(self.error_arr)-1:
             plt.axvline(self.convergence_iter + 1, color='r', linestyle='--', label=f'Converged at {self.convergence_iter+1}')
+        else: 
+            plt.axvline(len(self.error_arr), color='r', linestyle='--', label=f'Last iteration')
+            
+        # Extract parameter values
+        param_values = self.coef_arr[self.convergence_iter]
+        alpha0, beta0, gamma0 = param_values[0]
+        alpha1, beta1, gamma1 = param_values[1]
+        alpha2, beta2, gamma2 = param_values[2]
 
-            # Extract parameter values
-            param_values = self.coef_arr[self.convergence_iter]
-            alpha0, beta0, gamma0 = param_values[0]
-            alpha1, beta1, gamma1 = param_values[1]
-            alpha2, beta2, gamma2 = param_values[2]
+        # Compute acceleration
+        acc_x, acc_y, acc_z = alpha2 * 2, beta2 * 2, gamma2 * 2
 
-            # Compute acceleration
-            acc_x, acc_y, acc_z = alpha2 * 2, beta2 * 2, gamma2 * 2
+        # Get residual error at convergence iteration
+        residual_error = self.error_arr[self.convergence_iter]
 
-            # Get residual error at convergence iteration
-            residual_error = self.error_arr[self.convergence_iter]
+        # Prepare annotation text
+        param_text = (f'Iter: {self.convergence_iter+1}\n'
+                    f'Residual Error: {residual_error:.6f}\n'
+                    f'Params:\n'
+                    f'$\\alpha_0$: {alpha0:.3f}, $\\alpha_1$: {alpha1:.3f}, $\\alpha_2$: {alpha2:.3f}\n'
+                    f'$\\beta_0$: {beta0:.3f}, $\\beta_1$: {beta1:.3f}, $\\beta_2$: {beta2:.3f}\n'
+                    f'$\\gamma_0$: {gamma0:.3f}, $\\gamma_1$: {gamma1:.3f}, $\\gamma_2$: {gamma2:.3f}\n'
+                    f'Acceleration:\n'
+                    f'$a_x$: {acc_x:.3f}, $a_y$: {acc_y:.3f}, $a_z$: {acc_z:.3f}')
 
-            # Prepare annotation text
-            param_text = (f'Converged\nIter: {self.convergence_iter+1}\n'
-                        f'Residual Error: {residual_error:.6f}\n'
-                        f'Params:\n'
-                        f'$\\alpha_0$: {alpha0:.3f}, $\\alpha_1$: {alpha1:.3f}, $\\alpha_2$: {alpha2:.3f}\n'
-                        f'$\\beta_0$: {beta0:.3f}, $\\beta_1$: {beta1:.3f}, $\\beta_2$: {beta2:.3f}\n'
-                        f'$\\gamma_0$: {gamma0:.3f}, $\\gamma_1$: {gamma1:.3f}, $\\gamma_2$: {gamma2:.3f}\n'
-                        f'Acceleration:\n'
-                        f'$a_x$: {acc_x:.3f}, $a_y$: {acc_y:.3f}, $a_z$: {acc_z:.3f}')
+        x_pos = max(self.convergence_iter - 5, 1)  # Shift left but keep within bounds
+        y_pos = residual_error * 1.15  # Position slightly above the point
 
-            x_pos = max(self.convergence_iter - 5, 1)  # Shift left but keep within bounds
-            y_pos = residual_error * 1.15  # Position slightly above the point
-
-            plt.annotate(param_text, 
-                        xy=(self.convergence_iter + 1, residual_error),  # Point to red line
-                        xytext=(x_pos, y_pos),  # Keep text left
-                        arrowprops=dict(arrowstyle='->', lw=1.5, color='red'),
-                        fontsize=10, color='red', 
-                        bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5', alpha=0.85),
-                        ha='right')
+        plt.annotate(param_text, 
+                    xy=(self.convergence_iter + 1, residual_error),  # Point to red line
+                    xytext=(x_pos, y_pos),  # Keep text left
+                    arrowprops=dict(arrowstyle='->', lw=1.5, color='red'),
+                    fontsize=10, color='red', 
+                    bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5', alpha=0.85),
+                    ha='right')
 
         plt.xlabel('Iteration')
         plt.ylabel('Error (Squared Error)')
-        plt.title('Error vs. Iterations')
-
-        if convergence_threshold:
-            plt.axhline(convergence_threshold, color='g', linestyle=':', label=f'Threshold {convergence_threshold}')
-        
+        plt.title('Error vs. Iterations')        
         plt.legend()
         plt.grid(True)
+        plt.savefig(f"{os.getcwd()}/fitting_deg2.png")
+        print("file has been save to: fitting_deg2.png")
         plt.show()
+    
+    def plot_result(self, y:np.ndarray):
+        fig = plt.figure(figsize=(10, 8))
+        ax = fig.add_subplot(111, projection='3d')
+
+        y_pred = np.dot(self.D, self.coef_arr[self.convergence_iter])
+        errors = np.linalg.norm(y - y_pred, axis=1)
+
+        # Plot error lines first to ensure visibility
+        for i in range(len(y)):
+            ax.plot([y[i, 0], y_pred[i, 0]],
+                    [y[i, 1], y_pred[i, 1]],
+                    [y[i, 2], y_pred[i, 2]],
+                    'k--', alpha=0.8, label='Error' if i == 0 else "")
+
+            # Add error values as text
+            mid_x = (y[i, 0] + y_pred[i, 0]) / 2
+            mid_y = (y[i, 1] + y_pred[i, 1]) / 2
+            mid_z = (y[i, 2] + y_pred[i, 2]) / 2
+            ax.text(mid_x, mid_y, mid_z, f'{errors[i]:.2f}', color='black', fontsize=8)
+
+        # Plot actual and estimated trajectories
+        ax.plot(y[:, 0], y[:, 1], y[:, 2], 'o-', label='Actual Trajectory')
+        ax.plot(y_pred[:, 0], y_pred[:, 1], y_pred[:, 2], 'o-', label='Estimated Trajectory')
+
+        # Labels and title
+        ax.set_xlabel('X Coordinate')
+        ax.set_ylabel('Y Coordinate')
+        ax.set_zlabel('Z Coordinate')
+        ax.set_title('Actual vs Estimated Trajectory with Errors')
+        ax.legend()
+        plt.savefig(f"{os.getcwd()}/prediction_deg2.png")
+        print("file has been save to: prediction_deg2.png")
+        plt.show()
+
 
 def plot_trajectory_3d(time: np.ndarray, points: np.ndarray):
     x, y, z = points[:, 0], points[:, 1], points[:, 2]
 
-    fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection='3d')
 
     # Plot the trajectory
@@ -287,10 +350,10 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Parse parameters in a POSIX-style.")
 
     # Add arguments
-    parser.add_argument("-lr", "--learning_rate", type=float, help="Set the learning rate", required=True, default=0.01)
-    parser.add_argument("-it", "--iterations", type=int, help="Set the max iteration number", required=True, default=20)
-    parser.add_argument("-d", "--degree", type=int, help="Set the degree for the polynomial model", choices=[1, 2], required=True, default=1)
-    parser.add_argument("-ct", "--convergence_threshold", type=float, help="Set the convergence threshold", default=1e-5)
+    parser.add_argument("-lr", "--learning_rate", type=float, help="Set the learning rate.", required=True, default=0.01)
+    parser.add_argument("-it", "--iterations", type=int, help="Set the max iteration number.", required=True, default=20)
+    parser.add_argument("-d", "--degree", type=int, help="Set the degree for the polynomial model.", choices=[1, 2], required=True, default=1)
+    parser.add_argument("-ct", "--convergence_threshold", type=float, help="Set the convergence threshold (optional). Convergence Threshold: determines when an iterative algorithm should stop, if changes in the objective function become negligible according to the threshold value.)", default=-np.inf)
     
     # Parse arguments
     args = parser.parse_args()
@@ -303,15 +366,17 @@ if __name__ == "__main__":
     print(f"Learning Rate: {lr}")
     print(f"Iterations: {iter}")
     print(f"Degree: {deg}")
+    if ct > 0:
+        print(f"Convergence Threshold: {ct}")
 
     if deg == 1:
         model = Degree1()
     elif deg == 2:
         model = Degree2()
 
-
     plot_trajectory_3d(TIME, DATA_T)
     model.fit(TIME, DATA_T, lr, iter, ct)
     predicted_position = model.predict(7)
     print(f"Predicted position at t=7: {predicted_position}")
-    model.plot()
+    model.plot_fitting()
+    model.plot_result(DATA_T)
