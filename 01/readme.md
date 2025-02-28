@@ -1,5 +1,7 @@
 ## Assignment 1: Linear Regression
-The work is done in a Python 3.12 environment by Group 9: Ming-Chieh Hu, Neelabh Singh & Frederick Auer.
+The work is done in a Python 3.12 environment by Group 9: Ming-Chieh Hu, Neelabh Singh & Frederick Auer. 
+- Run `main.py` if you want to reproduce the results of the two regression models (see below on how to set parameters). 
+- Run `cylindrical_model.py` to see our experiment on a cylindrical tracjectory model for this specific dataset.
 
 ### Getting started
 Install these packages before use:
@@ -16,23 +18,21 @@ pyparsing==3.2.1
 python-dateutil==2.9.0.post0
 six==1.17.0
 ```
-Or just:
+Or simply:
 ```
 pip install -r requirements.txt
 ```
 
 ### How to run the code
-There are 4 paramaters to set, descriptions as below:
-```
-options:
-  -h, --help            show this help message and exit
-  -lr LEARNING_RATE, --learning_rate LEARNING_RATE
-                        Set the learning rate.
-  -it ITERATIONS, --iterations ITERATIONS
-                        Set the max iteration number.
-  -d {1,2}, --degree {1,2}
-                        Set the degree for the polynomial model.
-  -ct CONVERGENCE_THRESHOLD, --convergence_threshold CONVERGENCE_THRESHOLD
-                        Set the convergence threshold (optional). Convergence Threshold: determines when an iterative algorithm should stop, if changes in the
-                        objective function become negligible according to the threshold value.
-```
+Simply use `python main.py -d 1 -it 100 -lr 0.01 -ct 0.001`  
+or `python main.py -d 2 -it 100 -lr 0.0001 -ct 0.001` 
+to reproduce the results in the report. 
+
+#### Parameters
+There are 4 paramaters to be set, descriptions as below:
+- `-lr` learning rate: learning rate of the gradient descent algorithm
+- `-it` iterations: the max iteration number
+- `-d` degrees: the degree for the polynomial model, 1: constant speed model, 2: constant acceleration model
+- `-ct` convergence threshold: determines when an iterative algorithm should stop, if changes in the objective function become negligible according to the threshold value.
+
+Use `python main.py -h` for help.
