@@ -1,16 +1,17 @@
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 
-# Daxta definition (constant)
+# Data definition (constant)
 DATA = np.array([
     [ 2.00, 1.08, -0.83, -1.97, -1.31, 0.57 ],
     [ 0.00, 1.68, 1.82, 0.28, -1.51, -1.91 ],
     [ 1.00, 2.38, 2.49, 2.15, 2.59, 4.32 ]
 ])
 DATA_T = DATA.T
-T = np.arange(1, len(DATA_T)+1)
+TIME = np.arange(1, len(DATA_T)+1)
 
 class Model:
     def __init__(self, degree: int):
@@ -58,10 +59,10 @@ class Degree1(Model):
         # ])
 
     def predict(self, t: float) -> np.ndarray:
-        "Part c: This function will predict the next position of the drone at t=7."
+        "This function will predict the next position of the drone at t=7."
         return self.A[0] + self.A[1] * t
-    
-    def fit(self, x: np.ndarray, y: np.ndarray, lr: int, iter: int, ct: float):
+
+    def fit(self, x: np.ndarray, y: np.ndarray, lr: int, iter: int, ct: float|None):
         assert len(x) == len(y)
 
         n = len(x)
@@ -143,7 +144,6 @@ class Degree1(Model):
         plt.legend()
         plt.grid(True)
         plt.show()
-
 
 class Degree2(Model):
     def __init__(self):
@@ -257,7 +257,30 @@ class Degree2(Model):
         plt.grid(True)
         plt.show()
 
+def plot_trajectory_3d(time: np.ndarray, points: np.ndarray):
+    x, y, z = points[:, 0], points[:, 1], points[:, 2]
 
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot the trajectory
+    ax.plot(x, y, z, marker='o', linestyle='-', label='Tracked Trajectory')
+
+    # Annotate time points
+    for i, t in enumerate(time.flatten()):  # Flatten time array to avoid shape mismatch
+        ax.text(x[i], y[i], z[i], f'T={t}', fontsize=10, color='red')
+
+    # Labels and title
+    ax.set_xlabel('X Coordinate')
+    ax.set_ylabel('Y Coordinate')
+    ax.set_zlabel('Z Coordinate')
+    ax.set_title('Tracked Trajectory over Time')
+    ax.legend()
+
+    # plt.show()
+    # print(os.getcwd())
+    plt.savefig(f"{os.getcwd()}/trajectory_3d_plot.png")
+    print("file has been save to: trajectory_3d_plot.png")
 
 if __name__ == "__main__":
     # Create argument parser
@@ -286,7 +309,9 @@ if __name__ == "__main__":
     elif deg == 2:
         model = Degree2()
 
-    model.fit(T, DATA_T, lr, iter, ct)
+
+    plot_trajectory_3d(TIME, DATA_T)
+    model.fit(TIME, DATA_T, lr, iter, ct)
     predicted_position = model.predict(7)
     print(f"Predicted position at t=7: {predicted_position}")
     model.plot()
