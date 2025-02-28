@@ -353,7 +353,7 @@ if __name__ == "__main__":
     parser.add_argument("-lr", "--learning_rate", type=float, help="Set the learning rate.", required=True, default=0.01)
     parser.add_argument("-it", "--iterations", type=int, help="Set the max iteration number.", required=True, default=20)
     parser.add_argument("-d", "--degree", type=int, help="Set the degree for the polynomial model.", choices=[1, 2], required=True, default=1)
-    parser.add_argument("-ct", "--convergence_threshold", type=float, help="Set the convergence threshold (optional). Convergence Threshold: determines when an iterative algorithm should stop, if changes in the objective function become negligible according to the threshold value.)", default=-np.inf)
+    parser.add_argument("-ct", "--convergence_threshold", type=float, help="Set the convergence threshold (optional). Convergence Threshold: determines when an iterative algorithm should stop, if changes in the objective function become negligible according to the threshold value.", default=-np.inf)
     
     # Parse arguments
     args = parser.parse_args()
