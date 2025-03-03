@@ -4,7 +4,7 @@ A repo for geo-5017 Machine Learning for the Built Environment file syncing and 
 ### Students
 - Ming-Chieh Hu, 6186416
 - Neelabh Singh, 6052045
-- Frederick Auer
+- Frederick Auer, 5103673
 
 ### Folder Structure
 ```
