@@ -105,7 +105,7 @@ def plot_trajectory_witht7(t, data, r, omega, c):
 
 # Example usage
 if __name__ == "__main__":
-    r_opt, omega_opt, c_opt = gradient_descent(TIME, DATA_T)
+    r_opt, omega_opt, c_opt = gradient_descent(TIME, DATA_T, 0.01, 100000)
     plot_trajectory(TIME, DATA_T, r_opt, omega_opt, c_opt)
     plot_trajectory_witht7(TIME, DATA_T, r_opt, omega_opt, c_opt)
 
