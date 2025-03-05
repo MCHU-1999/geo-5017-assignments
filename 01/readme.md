@@ -24,8 +24,8 @@ pip install -r requirements.txt
 ```
 
 ### How to run the code
-Simply use `python main.py -d 1 -it 100 -lr 0.01 -ct 0.001`  
-or `python main.py -d 2 -it 100 -lr 0.0001 -ct 0.001` 
+Simply use `python main.py -d 1 -it 100 -lr 0.01`  
+or `python main.py -d 2 -it 100000 -lr 0.0001` 
 to reproduce the results in the report. 
 
 #### Parameters
