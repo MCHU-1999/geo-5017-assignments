@@ -12,7 +12,6 @@ DATA = np.array([
 DATA_T = DATA.T
 TIME = np.arange(1, len(DATA_T) + 1)
 
-
 class Model:
     def __init__(self, degree: int):
         """Constructor.
@@ -90,7 +89,7 @@ class Degree1(Model):
         if self.convergence_iter is None:
             self.convergence_iter = iter - 1
 
-    def plot_fitting(self):
+    def plot_fitting(self, folder_path: str):
         plt.figure(figsize=(12, 6))
         plt.plot(range(1, len(self.error_arr) + 1), self.error_arr, marker='o', linestyle='-', color='b', label="Error")
 
@@ -139,11 +138,12 @@ class Degree1(Model):
         plt.title('Error vs. Iterations')
         plt.legend()
         plt.grid(True)
-        plt.savefig(f"{os.getcwd()}/fitting_deg1.png")
+        plt.tight_layout()
+        plt.savefig(f"{folder_path}/fitting_deg1.png", bbox_inches='tight', pad_inches=0, dpi=150)
         print("file has been save to: fitting_deg1.png")
         plt.show()
 
-    def plot_result(self, y: np.ndarray):
+    def plot_result(self, y: np.ndarray, folder_path: str):
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111, projection='3d')
 
@@ -173,7 +173,9 @@ class Degree1(Model):
         ax.set_zlabel('Z Coordinate')
         ax.set_title('Actual vs Estimated Trajectory with Errors')
         ax.legend()
-        plt.savefig(f"{os.getcwd()}/prediction_deg1.png")
+        ax.view_init(elev=30, azim=45)
+        plt.tight_layout()
+        plt.savefig(f"{folder_path}/prediction_deg1.png", bbox_inches='tight', pad_inches=0, dpi=150)
         print("file has been save to: prediction_deg1.png")
         plt.show()
 
@@ -187,7 +189,7 @@ class Degree2(Model):
         self.A = np.array([
             [1, 1, 1],  # [alpha_0, beta_0, gamma_0]
             [1, 1, 1],  # [alpha_1, beta_1, gamma_1]
-            [1, 1, 1]  # [alpha_2, beta_2, gamma_2]
+            [1, 1, 1]   # [alpha_2, beta_2, gamma_2]
         ], dtype=float)
         self.error_arr = []
         self.coef_arr = []
@@ -238,7 +240,7 @@ class Degree2(Model):
         if self.convergence_iter is None:
             self.convergence_iter = iter - 1
 
-    def plot_fitting(self):
+    def plot_fitting(self, folder_path: str):
         plt.figure(figsize=(12, 6))
         plt.plot(range(1, len(self.error_arr) + 1), self.error_arr, marker='o', linestyle='-', color='b', label="Error")
 
@@ -286,11 +288,12 @@ class Degree2(Model):
         plt.title('Error vs. Iterations')
         plt.legend()
         plt.grid(True)
-        plt.savefig(f"{os.getcwd()}/fitting_deg2.png")
+        plt.tight_layout()
+        plt.savefig(f"{folder_path}/fitting_deg2.png", bbox_inches='tight', pad_inches=0, dpi=150)
         print("file has been save to: fitting_deg2.png")
         plt.show()
 
-    def plot_result(self, y: np.ndarray):
+    def plot_result(self, y: np.ndarray, folder_path: str):
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111, projection='3d')
 
@@ -320,11 +323,13 @@ class Degree2(Model):
         ax.set_zlabel('Z Coordinate')
         ax.set_title('Actual vs Estimated Trajectory with Errors')
         ax.legend()
-        plt.savefig(f"{os.getcwd()}/prediction_deg2.png")
+        ax.view_init(elev=30, azim=45)
+        plt.tight_layout()
+        plt.savefig(f"{folder_path}/prediction_deg2.png", bbox_inches='tight', pad_inches=0, dpi=150)
         print("file has been save to: prediction_deg2.png")
         plt.show()
 
-    def plot_withpredictedt7(self, y: np.ndarray):
+    def plot_withpredictedt7(self, y: np.ndarray, folder_path: str):
         fig = plt.figure(figsize=(10, 8))
         ax = fig.add_subplot(111, projection='3d')
 
@@ -354,12 +359,14 @@ class Degree2(Model):
                 [predicted_t7[2], y_pred[-1, 2]], color='red', linestyle='--')
 
         ax.legend()
-        plt.savefig(f"{os.getcwd()}/prediction_deg2_t=7.png")
+        ax.view_init(elev=30, azim=45)
+        plt.tight_layout()
+        plt.savefig(f"{folder_path}/prediction_deg2_t=7.png", bbox_inches='tight', pad_inches=0, dpi=150)
         print("file has been save to: prediction_deg2_t=7.png")
         plt.show()
 
 
-def plot_trajectory_3d(time: np.ndarray, points: np.ndarray):
+def plot_trajectory_3d(time: np.ndarray, points: np.ndarray, folder_path: str):
     x, y, z = points[:, 0], points[:, 1], points[:, 2]
 
     fig = plt.figure(figsize=(10, 8))
@@ -378,10 +385,10 @@ def plot_trajectory_3d(time: np.ndarray, points: np.ndarray):
     ax.set_zlabel('Z Coordinate')
     ax.set_title('Tracked Trajectory over Time')
     ax.legend()
+    ax.view_init(elev=30, azim=45)
 
-    # plt.show()
-    # print(os.getcwd())
-    plt.savefig(f"{os.getcwd()}/trajectory_3d_plot.png")
+    plt.tight_layout()
+    plt.savefig(f"{folder_path}/trajectory_3d_plot.png", bbox_inches='tight', pad_inches=0, dpi=150)
     print("file has been save to: trajectory_3d_plot.png")
 
 
@@ -414,15 +421,23 @@ if __name__ == "__main__":
     if ct > 0:
         print(f"Convergence Threshold: {ct}")
 
+    folder_path = f"{os.getcwd()}/lr{lr}_it{iter}_deg{deg}"
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+        print(f"Folder '{folder_path}' created.")
+    else:
+        print(f"Folder '{folder_path}' already exists.")
+
     if deg == 1:
         model = Degree1()
     elif deg == 2:
         model = Degree2()
 
-    plot_trajectory_3d(TIME, DATA_T)
+    plot_trajectory_3d(TIME, DATA_T, os.getcwd())
     model.fit(TIME, DATA_T, lr, iter, ct)
     predicted_position = model.predict(7)
     print(f"Predicted position at t=7: {predicted_position}")
-    model.plot_fitting()
-    model.plot_result(DATA_T)
-    model.plot_withpredictedt7(DATA_T)
+    model.plot_fitting(folder_path)
+    model.plot_result(DATA_T, folder_path)
+    if deg == 2:
+        model.plot_withpredictedt7(DATA_T, folder_path)
