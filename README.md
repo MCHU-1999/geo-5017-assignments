@@ -13,7 +13,8 @@ A repo for geo-5017 Machine Learning for the Built Environment file syncing and 
 │   ├── cylindrical_model.py
 │   ├── requirements.txt
 │   ├── readme.md
-│   └── GEO5017-A1-LinearRegression.pdf
+│   ├── GEO5017-A1-LinearRegression.pdf
+│   └── report.pdf
 ├── 02 (A2)
 │   └── ...
 └── README.md

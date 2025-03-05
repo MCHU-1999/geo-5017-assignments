@@ -2,6 +2,9 @@
 .DS_Store
 .idea/
 venv/
+*.zip
+
+# experiment imgs
 01/*.png
 01/*_deg1/
 01/*_deg2/
