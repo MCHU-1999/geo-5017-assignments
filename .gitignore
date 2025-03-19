@@ -4,7 +4,10 @@
 venv/
 *.zip
 
-# experiment imgs
+# experiment imgs A1
 01/*.png
 01/*_deg1/
 01/*_deg2/
+
+# Pointcloud dataset A2
+*.xyz
