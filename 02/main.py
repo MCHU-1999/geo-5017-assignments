@@ -1,14 +1,12 @@
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.neighbors import KDTree
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
-from scipy.spatial import ConvexHull
 from tqdm import tqdm
 from os.path import exists, join
 from os import listdir
@@ -61,6 +59,17 @@ def feature_preparation(data_path: str, feature_names: list[str]):
     # data_header = 'ID,label,height,root_density,area,shape_index,linearity,sphericity'
     np.savetxt(data_file, outputs, fmt='%10.5f', delimiter=',', newline='\n', header=data_header)
 
+def normalize_feature(X: np.ndarray):
+    XT = X.transpose()
+    for row in XT:
+        max = np.amax(row)
+        min = np.amin(row)
+        diff = max - min
+        row = (row - min) / diff
+        assert np.amax(row) == 1
+        assert np.amin(row) == 0
+
+    return XT.transpose()
 
 def data_loading(data_file='data.txt'):
     """
@@ -75,12 +84,14 @@ def data_loading(data_file='data.txt'):
     ID = data[:, 0].astype(np.int32)
     y = data[:, 1].astype(np.int32)
     X = data[:, 2:].astype(np.float32)
-    features = header.reshape((-1))[2:]
-    print(features)
+    X = normalize_feature(X)
+    
+    feature_names = header.reshape((-1))[2:]
+    # print(feature_names)
 
-    return ID, X, y, features
+    return ID, X, y, feature_names
 
-def feature_visualization_2d(X, reduce: Literal["PCA","TSNE"]|None, features):
+def feature_visualization_2d(X, reduce: Literal["PCA","TSNE"] | None, features):
     """
     Visualize the features using PCA or T-SNE
         X: input features. This assumes classes are stored in a sequential manner
@@ -103,27 +114,16 @@ def feature_visualization_2d(X, reduce: Literal["PCA","TSNE"]|None, features):
         X_new = tsne.fit_transform(X)
     else:
         print("Didn't specify dimensionality reducing method, plotting the first 2 features.")
-        # plot the data with first two features
-        for i in range(5):
-            ax.scatter(X[100*i:100*(i+1), 0], X[100*i:100*(i+1), 1], marker="o", c=colors[i], edgecolor="k", label=labels[i])
-
-        # show the figure with labels
-        ax.set_xlabel(f'x1: {features[0]}')
-        ax.set_ylabel(f'x2: {features[1]}')
-        ax.legend()
-        plt.show()
-
-        return
+        X_new = X
 
     for i in range(5):
         ax.scatter(X_new[100*i:100*(i+1), 0], X_new[100*i:100*(i+1), 1], marker="o", c=colors[i], edgecolor="k", label=labels[i])
 
     # show the figure with labels
-    ax.set_xlabel('x1')
-    ax.set_ylabel('x2')
+    ax.set_xlabel(f'x1: {features[0] if not reduce else ''}')
+    ax.set_ylabel(f'x2: {features[1] if not reduce else ''}')
     ax.legend()
     plt.show()
-
 
 def SVM_classification(X, y):
     """
@@ -163,7 +163,6 @@ def SVM_classification(X, y):
         print(f"Parameters: {params}")
         print(f"Accuracy: {acc}")
         print("-" * 50)
-
 
 def RF_classification(X, y):
     """
@@ -209,10 +208,8 @@ def RF_classification(X, y):
 # This is used in feature_preparation() function, please update it properly.
 SELECTED_FEATURES = [
     "height", 
-    "cmass_density", 
-    "root_density", 
-    "shape_index", 
-    "linearity", 
+    "hw_ratio", 
+    "2d_density", 
     "sphericity"
 ]
 
@@ -233,9 +230,9 @@ if __name__=='__main__':
     feature_visualization_2d(X=X, reduce=None, features=features)
 
     # SVM classification
-    print('Start SVM classification')
-    SVM_classification(X, y)
+    # print('Start SVM classification')
+    # SVM_classification(X, y)
 
     # RF classification
-    # print('Start RF classification')
-    # RF_classification(X, y)
+    print('Start RF classification')
+    RF_classification(X, y)
