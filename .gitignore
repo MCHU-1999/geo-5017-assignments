@@ -12,4 +12,4 @@ __pycache__
 
 # Pointcloud dataset A2
 *.xyz
-data.txt
+feature_cov/
