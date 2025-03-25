@@ -1,7 +1,5 @@
 import numpy as np
 import math
-from os import listdir
-from tqdm import tqdm
 from scipy.spatial import ConvexHull
 from sklearn.neighbors import KDTree
 from typing import Dict, Literal, Callable
