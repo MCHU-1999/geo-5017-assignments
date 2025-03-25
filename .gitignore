@@ -3,6 +3,7 @@
 .idea/
 venv/
 *.zip
+__pycache__
 
 # experiment imgs A1
 01/*.png
@@ -11,3 +12,4 @@ venv/
 
 # Pointcloud dataset A2
 *.xyz
+feature_cov/
