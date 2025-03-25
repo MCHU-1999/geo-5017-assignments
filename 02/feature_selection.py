@@ -1,6 +1,6 @@
 import numpy as np
 from urban_obj import urban_object, FEATURES
-from main import data_loading
+from main import data_loading, feature_preparation
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -40,14 +40,14 @@ def between_class_scatter(X: np.ndarray, Y: np.ndarray, N=500):
     return Sb
 
 def plot_heatmap(matrix: np.ndarray[np.ndarray[np.float32]], plot_title: str):
-        features_list = list(FEATURES.keys())
+        feature_keys = list(FEATURES.keys())
 
         # Plot matrix
         plt.figure(figsize=(8, 8))
         sns.heatmap(
             matrix, annot=False, fmt="f", cmap="Purples",
             # vmin=0, vmax=10,
-            xticklabels=features_list, yticklabels=features_list
+            xticklabels=feature_keys, yticklabels=feature_keys
         )
 
         plt.title(f"{plot_title}")
@@ -57,7 +57,11 @@ def plot_heatmap(matrix: np.ndarray[np.ndarray[np.float32]], plot_title: str):
         plt.savefig(f"./feature_cov/{plot_title}.png")
 
 if __name__ == "__main__":
+    path = './pointclouds-500'
+    feature_keys = list(FEATURES.keys())
 
+    print('Start preparing features (to test Var and Cov)')
+    feature_preparation(path, feature_keys, 'data_11_feature.txt')
     ID, X, y, features = data_loading('data_11_feature.txt')
 
     Sw = in_class_scatter(X, y, 500)
@@ -69,11 +73,11 @@ if __name__ == "__main__":
 
     J = np.diag(Sb / Sw)
     ranked_indices = np.argsort(J)[::-1]    # Sort in descending order
-    features_list = list(FEATURES.keys())
+    
     print("J values")
     print("-"*40)
     for i in ranked_indices:
-        print(f"{features_list[i]:20s} {J[i]:.4f}")
+        print(f"{feature_keys[i]:20s} {J[i]:.4f}")
 
 
 

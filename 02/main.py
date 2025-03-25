@@ -16,15 +16,15 @@ import itertools
 from urban_obj import urban_object
 
 
-def feature_preparation(data_path: str, feature_names: list[str]):
+def feature_preparation(data_path: str, feature_names: list[str], o_filename='data.txt'):
     """
     Prepare features of the input point cloud objects
         data_path: the path to read data
     """
     # check if the current data file exist
-    data_file = 'data.txt'
-    if exists(data_file):
-        print(f"{data_file} already exist, will proceed with the file.")
+    # data_file = 'data.txt'
+    if exists(o_filename):
+        print(f"{o_filename} already exist, will proceed with the file.")
         return
 
     # obtain the files in the folder
@@ -57,7 +57,7 @@ def feature_preparation(data_path: str, feature_names: list[str]):
     # write the output to a local file
     data_header = 'ID,label,' + ','.join(feature_names)
     # data_header = 'ID,label,height,root_density,area,shape_index,linearity,sphericity'
-    np.savetxt(data_file, outputs, fmt='%10.5f', delimiter=',', newline='\n', header=data_header)
+    np.savetxt(o_filename, outputs, fmt='%10.5f', delimiter=',', newline='\n', header=data_header)
 
 def normalize_feature(X: np.ndarray):
     XT = X.transpose()
