@@ -139,7 +139,7 @@ def SVM_classification(X, y):
     # Define hyperparameters
     param_grid = {
         'C': [0.1, 1, 10, 100],
-        'gamma': [0.001, 0.01, 0.1, 1],
+        'gamma': [0.01, 0.1, 1],
         'kernel': ['rbf', 'linear'],
         'class_weight': [None, 'balanced']
     }
@@ -163,10 +163,8 @@ def SVM_classification(X, y):
             best_acc = acc
             best_params = params
 
-    for params, acc in predictions.items():
-        print(f"Parameters: {params}")
-        print(f"Accuracy: {acc:.4f}")
-        print("-" * 50)
+    # Print predictions from different models
+    print_param_table(param_grid, param_sets, predictions, y_test)
 
     # Generate learning curve for best parameters
     print("\nGenerating learning curve for best parameters:")
@@ -190,7 +188,6 @@ def RF_classification(X, y):
     # Define hyperparameters
     param_grid = {
         'n_estimators': [50, 100, 200],
-        'max_depth': [None, 10, 20],
         'max_features': ['sqrt', 'log2'],
         'criterion': ["gini", "entropy", "log_loss"],
         'class_weight': [None, 'balanced']
@@ -215,11 +212,8 @@ def RF_classification(X, y):
             best_acc = acc
             best_params = params
 
-    # Print all results
-    for params, acc in predictions.items():
-        print(f"Parameters: {params}")
-        print(f"Accuracy: {acc:.4f}")
-        print("-" * 50)
+    # Print predictions from different models
+    print_param_table(param_grid, param_sets, predictions, y_test)
 
     # Generate learning curve for best parameters
     print("\nGenerating learning curve for best parameters:")
@@ -228,12 +222,51 @@ def RF_classification(X, y):
 
     learning_curve(X, y, 'random_forest', best_params)
 
+def print_param_table(param_grid: dict, param_sets: list[dict], predictions: dict, gt: list):
+    header_list = [f"{key:15s}" for key in param_grid.keys()]
+    header = ''.join(header_list)
+    print("\n"+header+"acc")
+    print("-" * 90)
+    for params, pred in zip(param_sets, predictions.values()):
+        acc = accuracy_score(gt, pred)
+        row_list = [f"{str(value):15}" for value in params.values()]
+        row_list.append(f"{acc:.4f}")
+        row = ''.join(row_list)
+        print(row)
+
+def generate_latex_table(param_grid: dict, param_sets: list[dict], predictions: dict, gt: list) -> str:
+    # Extract column names
+    headers = list(param_grid.keys()) + ["accuracy"]
+    
+    # LaTeX table header
+    latex_str = "\\begin{table}[h]\n"
+    latex_str += "    \\centering\n"
+    latex_str += "    \\begin{tabularx}{\\textwidth}{" + "".join("X" for _ in headers) + "}\n"
+    latex_str += "        \\toprule\n"
+    latex_str += "        " + " & ".join(f"\\textbf{{{col}}}" for col in headers) + " \\\\\n"
+    latex_str += "        \\midrule\n"
+    
+    # Generate table rows
+    for params, pred in zip(param_sets, predictions.values()):
+        acc = accuracy_score(gt, pred)
+        row = " & ".join(str(params[key]) for key in param_grid.keys()) + f" & {acc:.4f}"
+        latex_str += f"        {row} \\\\\n"
+    
+    # Close table
+    latex_str += "        \\bottomrule\n"
+    latex_str += "    \\end{tabularx}\n"
+    latex_str += "    \\caption{[CLASSIFIER] Hyperparameter Results}\n"
+    latex_str += "    \\label{tab:rf_results}\n"
+    latex_str += "\\end{table}"
+    
+    return latex_str
+
 
 # This is used in feature_preparation() function, please update it properly.
 SELECTED_FEATURES = [
     "height", 
     "hw_ratio", 
-    "2d_density", 
+    "2d_density",
     "sphericity"
 ]
 
@@ -253,7 +286,7 @@ if __name__=='__main__':
     print('Visualize the features')
     feature_visualization_2d(X=X, reduce='TSNE', features=features)
 
-    # # SVM classification
+    # SVM classification
     print('Start SVM classification')
     SVM_classification(X, y)
 

@@ -147,6 +147,25 @@ def cal_sphericity(obj: urban_object):
 
     return w[0] / (w[2] + 1e-5)
 
+def cal_multi_scale_entropy(obj: urban_object):
+
+    entropies = []
+    radii = [0.1, 0.3, 0.5, 1.0]
+
+    for radius in radii:
+        neighborhood_counts = []
+        for point in obj.points:
+            point_reshaped = point.reshape(1, -1)
+            count = obj.kd_tree.query_radius(point_reshaped, r=radius, count_only=True)[0]
+            neighborhood_counts.append(count)
+        #normalise
+        neighborhood_counts = np.array(neighborhood_counts) / obj.n
+
+        entropy = -np.sum(neighborhood_counts * np.log2(neighborhood_counts + 1e-10))
+        entropies.append(entropy)
+
+    return np.mean(entropies)
+
 # =============================================================================================
 # Update this FEATURES dict when adding new feature.
 # =============================================================================================
@@ -161,7 +180,8 @@ FEATURES: Dict[Literal[
     "shape_index", 
     "compactness",
     "linearity", 
-    "sphericity"
+    "sphericity",
+    "multi_scale_entropy"
 ], Callable[..., float]] = {
     "height": cal_height,
     "hw_ratio": cal_hw_ratio,
@@ -173,5 +193,6 @@ FEATURES: Dict[Literal[
     "shape_index": cal_shape_index,
     "compactness": cal_compactness,
     "linearity": cal_linearity,
-    "sphericity": cal_sphericity
+    "sphericity": cal_sphericity,
+    "multi_scale_entropy": cal_multi_scale_entropy
 }

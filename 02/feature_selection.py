@@ -46,7 +46,7 @@ def plot_heatmap(matrix: np.ndarray[np.ndarray[np.float32]], plot_title: str):
         plt.figure(figsize=(8, 8))
         sns.heatmap(
             matrix, annot=False, fmt="f", cmap="Purples",
-            # vmin=0, vmax=10,
+            vmin=0, vmax=10,
             xticklabels=feature_keys, yticklabels=feature_keys
         )
 
