@@ -142,6 +142,8 @@ def learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspace(0.1,
     train_acc, test_acc = [], []
     train_loss, test_loss = [], []
     sizes = []
+    # Create parameter string for display
+    params_str = ", ".join(f"{k}={v}" for k, v in param_set.items())
 
     # Reverse processing order to ensure final metrics use max samples
     for test_size in sorted(test_sizes, reverse=True):
@@ -180,7 +182,9 @@ def learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspace(0.1,
     final_gap = final_test_loss - final_train_loss
 
     # Plotting
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(18, 6))
+    fig.suptitle(f"Learning Curves ({classifier_type}): {params_str}",
+                 fontsize=14, y=1.02)
 
     # --- Accuracy Plot ---
     ax1.plot(sizes, train_acc, 'r--o', markersize=8, label="Train Accuracy")
@@ -381,6 +385,6 @@ if __name__=='__main__':
     print('Start SVM classification')
     SVM_classification(X, y)
 
-    # # RF classification
-    # print('Start RF classification')
-    # RF_classification(X, y)
+    # RF classification
+    print('Start RF classification')
+    RF_classification(X, y)
