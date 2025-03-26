@@ -47,6 +47,10 @@ class urban_object:
         """
         self.feature = [ FEATURES[f_name](self) for f_name in feature_names ]
 
+
+# =============================================================================================
+# Below are all 12 features we used.
+# =============================================================================================
 # height
 def cal_height(obj: urban_object):
     height = np.amax(obj.points[:, 2]) - np.amin(obj.points[:, 2])
@@ -143,7 +147,9 @@ def cal_sphericity(obj: urban_object):
 
     return w[0] / (w[2] + 1e-5)
 
-
+# =============================================================================================
+# Update this FEATURES dict when adding new feature.
+# =============================================================================================
 FEATURES: Dict[Literal[
     "height", 
     "hw_ratio", 
