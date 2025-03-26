@@ -137,14 +137,12 @@ def SVM_classification(X, y):
         'kernel': ['rbf', 'linear'],
         'class_weight': [None, 'balanced']
     }
+    param_sets = [dict(zip(param_grid.keys(), values)) for values in itertools.product(*param_grid.values())]
 
     # Find best parameters
     best_acc = 0
     best_params = None
     predictions = {}
-
-    param_sets = [dict(zip(param_grid.keys(), values))
-                  for values in itertools.product(*param_grid.values())]
 
     for params in tqdm(param_sets, total=len(param_sets)):
         model = svm.SVC(**params)
@@ -186,14 +184,12 @@ def RF_classification(X, y):
         'criterion': ["gini", "entropy", "log_loss"],
         'class_weight': [None, 'balanced']
     }
+    param_sets = [dict(zip(param_grid.keys(), values)) for values in itertools.product(*param_grid.values())]
 
     # Find best parameters
     best_acc = 0
     best_params = None
     predictions = {}
-
-    param_sets = [dict(zip(param_grid.keys(), values))
-                  for values in itertools.product(*param_grid.values())]
 
     for params in tqdm(param_sets, total=len(param_sets)):
         model = svm.SVC(**params)
