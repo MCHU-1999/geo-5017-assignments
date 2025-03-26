@@ -2,6 +2,8 @@
 The work is done in a Python 3.12 environment by Group 9: Ming-Chieh Hu, Neelabh Singh & Frederick Auer. 
 - Run `main.py` if you want to reproduce our results. 
 - Run `feature_selection.py` to see how each feature is evaluated and ranked according to our selection criteria.
+- `urban_obj.py` contains the class definition of `urban_object`.
+- `plot.py` contains the plotting function.
 
 ### Getting started
 Install these packages before use:
