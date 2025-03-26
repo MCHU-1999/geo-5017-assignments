@@ -292,8 +292,13 @@ def SVM_classification(X, y):
     print(f"Best Parameters: {best_params}")
     print(f"Best Accuracy: {best_acc:.4f}")
 
+    # Generate learning curve for best parameters
+    print("\nGenerating learning curve for best parameters:")
+    print(f"Best Parameters: {best_params}")
+    print(f"Best Accuracy: {best_acc:.4f}")
 
-    manual_learning_curve(X, y, 'svm', {'C': 1.0, 'kernel': 'rbf'})
+    manual_learning_curve(X, y, 'svm', best_params)
+
 
 def RF_classification(X, y):
     """
@@ -368,9 +373,9 @@ if __name__=='__main__':
     feature_visualization_2d(X=X, reduce=None, features=features)
 
     # # SVM classification
-    # print('Start SVM classification')
-    # SVM_classification(X, y)
+    print('Start SVM classification')
+    SVM_classification(X, y)
 
-    # RF classification
-    print('Start RF classification')
-    RF_classification(X, y)
+    # # RF classification
+    # print('Start RF classification')
+    # RF_classification(X, y)
