@@ -21,7 +21,6 @@ def feature_preparation(data_path: str, feature_names: list[str], o_filename='da
         data_path: the path to read data
     """
     # check if the current data file exist
-    # data_file = 'data.txt'
     if exists(o_filename):
         print(f"{o_filename} already exist, will proceed with the file.")
         return
@@ -70,7 +69,6 @@ def normalize_feature(X: np.ndarray):
 
     return XT.transpose()
 
-
 def data_loading(data_file='data.txt'):
     """
     Read the data with features from the data file
@@ -87,7 +85,6 @@ def data_loading(data_file='data.txt'):
     X = normalize_feature(X)
     
     feature_names = header.reshape((-1))[2:]
-    # print(feature_names)
 
     return ID, X, y, feature_names
 
@@ -105,7 +102,7 @@ def feature_visualization_2d(X, reduce: Literal["PCA","TSNE"] | None, features):
     colors = ['firebrick', 'grey', 'darkorange', 'dodgerblue', 'olivedrab']
     labels = ['building', 'car', 'fence', 'pole', 'tree']
 
-    # Reduce dimensionality to 2D
+    # Reduce dimensionality to 2D (or do nothing)
     if reduce == 'PCA':
         pca = PCA(n_components=2)
         X_new = pca.fit_transform(X)
@@ -131,9 +128,6 @@ def SVM_classification(X, y):
         X: features
         y: labels
     """
-    """
-        Conduct SVM classification with manual learning curve for best parameters
-        """
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
     # Define hyperparameters
@@ -156,9 +150,9 @@ def SVM_classification(X, y):
         model = svm.SVC(**params)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
-        acc = accuracy_score(y_test, y_pred)
-        predictions[str(params)] = acc
+        predictions[str(params)] = y_pred
 
+        acc = accuracy_score(y_test, y_pred)
         if acc > best_acc:
             best_acc = acc
             best_params = params
@@ -202,12 +196,12 @@ def RF_classification(X, y):
                   for values in itertools.product(*param_grid.values())]
 
     for params in tqdm(param_sets, total=len(param_sets)):
-        model = RandomForestClassifier(**params)
+        model = svm.SVC(**params)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
-        acc = accuracy_score(y_test, y_pred)
-        predictions[str(params)] = acc
+        predictions[str(params)] = y_pred
 
+        acc = accuracy_score(y_test, y_pred)
         if acc > best_acc:
             best_acc = acc
             best_params = params
@@ -291,5 +285,5 @@ if __name__=='__main__':
     SVM_classification(X, y)
 
     # RF classification
-    print('Start RF classification')
-    RF_classification(X, y)
+    # print('Start RF classification')
+    # RF_classification(X, y)
