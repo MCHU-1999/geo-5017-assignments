@@ -285,5 +285,5 @@ if __name__=='__main__':
     SVM_classification(X, y)
 
     # RF classification
-    # print('Start RF classification')
-    # RF_classification(X, y)
+    print('Start RF classification')
+    RF_classification(X, y)
