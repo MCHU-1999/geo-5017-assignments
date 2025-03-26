@@ -15,7 +15,7 @@ import itertools
 from sklearn.metrics import hinge_loss
 from sklearn.metrics import log_loss
 from urban_obj import urban_object
-
+from datetime import datetime
 
 def feature_preparation(data_path: str, feature_names: list[str], o_filename='data.txt'):
     """
@@ -128,7 +128,7 @@ def feature_visualization_2d(X, reduce: Literal["PCA","TSNE"] | None, features):
     plt.show()
 
 
-def manual_learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspace(0.1, 0.9, 9)):
+def learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspace(0.1, 0.9, 9)):
     """
     Generate a learning curve by manually varying train-test splits
 
@@ -143,7 +143,8 @@ def manual_learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspa
     train_loss, test_loss = [], []
     sizes = []
 
-    for test_size in test_sizes:
+    # Reverse processing order to ensure final metrics use max samples
+    for test_size in sorted(test_sizes, reverse=True):
         X_train, X_test, y_train, y_test = train_test_split(
             X, y, test_size=test_size, stratify=y, random_state=42
         )
@@ -190,7 +191,7 @@ def manual_learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspa
     ax1.grid(True, linestyle='--', alpha=0.7)
     ax1.legend(fontsize=12)
 
-    # Annotate FINAL values only
+    # Annotate FINAL values
     ax1.annotate(f'Final Train: {final_train_acc:.3f}',
                  xy=(final_size, final_train_acc),
                  xytext=(10, 10), textcoords='offset points',
@@ -209,7 +210,7 @@ def manual_learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspa
     ax2.grid(True, linestyle='--', alpha=0.7)
     ax2.legend(fontsize=12)
 
-    # Highlight FINAL gap only
+    # Highlight FINAL gap
     ax2.fill_between(sizes, train_loss, test_loss, color='gray', alpha=0.2)
     ax2.annotate(f'Final Gap: {final_gap:.3f}',
                  xy=(final_size, (final_train_loss + final_test_loss) / 2),
@@ -217,7 +218,7 @@ def manual_learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspa
                  ha='left', va='center', fontsize=10,
                  bbox=dict(boxstyle='round,pad=0.5', fc='white', alpha=0.8))
 
-    # Annotate FINAL values only
+    # Annotate FINAL values
     ax2.annotate(f'Final Train: {final_train_loss:.3f}',
                  xy=(final_size, final_train_loss),
                  xytext=(10, 10), textcoords='offset points',
@@ -226,6 +227,11 @@ def manual_learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspa
                  xy=(final_size, final_test_loss),
                  xytext=(10, -20), textcoords='offset points',
                  ha='left', va='top', fontsize=10)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"learning_curve_{classifier_type}_{timestamp}.png"
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    print(f"\nSaved plot as: {filename}")
 
     plt.tight_layout()
     plt.show()
@@ -281,7 +287,6 @@ def SVM_classification(X, y):
             best_acc = acc
             best_params = params
 
-    # Print all results
     for params, acc in predictions.items():
         print(f"Parameters: {params}")
         print(f"Accuracy: {acc:.4f}")
@@ -297,7 +302,7 @@ def SVM_classification(X, y):
     print(f"Best Parameters: {best_params}")
     print(f"Best Accuracy: {best_acc:.4f}")
 
-    manual_learning_curve(X, y, 'svm', best_params)
+    learning_curve(X, y, 'svm', best_params)
 
 
 def RF_classification(X, y):
@@ -345,7 +350,7 @@ def RF_classification(X, y):
     print(f"Best Parameters: {best_params}")
     print(f"Best Accuracy: {best_acc:.4f}")
 
-    manual_learning_curve(X, y, 'random_forest', best_params)
+    learning_curve(X, y, 'random_forest', best_params)
 
 
 # This is used in feature_preparation() function, please update it properly.
