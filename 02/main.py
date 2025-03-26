@@ -252,7 +252,9 @@ def generate_latex_table(param_grid: dict, param_sets: list[dict], predictions: 
     return latex_str
 
 
+# =============================================================================================
 # This is used in feature_preparation() function, please update it properly.
+# =============================================================================================
 SELECTED_FEATURES = [
     "height", 
     "hw_ratio", 
@@ -260,6 +262,9 @@ SELECTED_FEATURES = [
     "sphericity"
 ]
 
+# =============================================================================================
+# MAIN
+# =============================================================================================
 if __name__=='__main__':
     # specify the data folder
     path = './pointclouds-500'

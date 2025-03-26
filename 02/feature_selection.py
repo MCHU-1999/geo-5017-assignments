@@ -40,29 +40,33 @@ def between_class_scatter(X: np.ndarray, Y: np.ndarray, N=500):
     return Sb
 
 def plot_heatmap(matrix: np.ndarray[np.ndarray[np.float32]], plot_title: str):
-        feature_keys = list(FEATURES.keys())
+    feature_keys = list(FEATURES.keys())
 
-        # Plot matrix
-        plt.figure(figsize=(8, 8))
-        sns.heatmap(
-            matrix, annot=False, fmt="f", cmap="Purples",
-            vmin=0, vmax=10,
-            xticklabels=feature_keys, yticklabels=feature_keys
-        )
+    # Plot matrix
+    plt.figure(figsize=(8, 8))
+    sns.heatmap(
+        matrix, annot=False, fmt="f", cmap="Purples",
+        vmin=0, vmax=10,
+        xticklabels=feature_keys, yticklabels=feature_keys
+    )
 
-        plt.title(f"{plot_title}")
-        plt.ylabel("Features")
-        plt.xlabel("Features")
-        plt.tight_layout()
-        plt.savefig(f"./feature_cov/{plot_title}.png")
+    plt.title(f"{plot_title}")
+    plt.ylabel("Features")
+    plt.xlabel("Features")
+    plt.tight_layout()
+    plt.savefig(f"./feature_cov/{plot_title}.png")
 
+
+# =============================================================================================
+# MAIN: Print features ranked according to the J value
+# =============================================================================================
 if __name__ == "__main__":
     path = './pointclouds-500'
     feature_keys = list(FEATURES.keys())
 
     print('Start preparing features (to test Var and Cov)')
-    feature_preparation(path, feature_keys, 'data_all_feature.txt')
-    ID, X, y, features = data_loading('data_all_feature.txt')
+    feature_preparation(path, feature_keys, 'data_all_features.txt')
+    ID, X, y, features = data_loading('data_all_features.txt')
 
     Sw = in_class_scatter(X, y, 500)
     Sb = between_class_scatter(X, y, 500)
