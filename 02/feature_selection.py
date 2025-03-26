@@ -61,15 +61,11 @@ if __name__ == "__main__":
     feature_keys = list(FEATURES.keys())
 
     print('Start preparing features (to test Var and Cov)')
-    feature_preparation(path, feature_keys, 'data_11_feature.txt')
-    ID, X, y, features = data_loading('data_11_feature.txt')
+    feature_preparation(path, feature_keys, 'data_all_feature.txt')
+    ID, X, y, features = data_loading('data_all_feature.txt')
 
     Sw = in_class_scatter(X, y, 500)
     Sb = between_class_scatter(X, y, 500)
-    # plot_heatmap(Sw, "Sw")
-    # plot_heatmap(Sb, "Sb")
-    # print(Sw)
-    # print(Sb)
 
     J = np.diag(Sb / Sw)
     ranked_indices = np.argsort(J)[::-1]    # Sort in descending order
@@ -78,8 +74,4 @@ if __name__ == "__main__":
     print("-"*40)
     for i in ranked_indices:
         print(f"{feature_keys[i]:20s} {J[i]:.4f}")
-
-
-
-
 
