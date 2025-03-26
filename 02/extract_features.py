@@ -42,49 +42,107 @@ class urban_object:
         """
         Compute the features, here we provide two example features. You're encouraged to design your own features
         """
-        # calculate the height
-        height = np.amax(self.points[:, 2])
+
+        # 1. Height
+        height = np.amax(self.points[:, 2]) - np.amin(self.points[:, 2])
         self.feature.append(height)
 
-        # get the root point and top point
-        root = self.points[[np.argmin(self.points[:, 2])]]
-        top = self.points[[np.argmax(self.points[:, 2])]]
-
-        # construct the 2D and 3D kd tree
-        kd_tree_2d = KDTree(self.points[:, :2], leaf_size=5)
-        kd_tree_3d = KDTree(self.points, leaf_size=5)
-
-        # compute the root point planar density
-        radius_root = 0.2
-        count = kd_tree_2d.query_radius(root[:, :2], r=radius_root, count_only=True)
-        root_density = 1.0*count[0] / len(self.points)
+        # 2. Root density
+        root = self.points[np.argmin(self.points[:, 2])].reshape(1, -1)
+        radius = 0.5
+        kd_tree = KDTree(self.points)
+        count = kd_tree.query_radius(root, r=radius, count_only=True)
+        root_density = 1.0 * count[0] / len(self.points)
         self.feature.append(root_density)
 
-        # compute the 2D footprint and calculate its area
+        # 3. 2D area
         hull_2d = ConvexHull(self.points[:, :2])
-        hull_area = hull_2d.volume
-        self.feature.append(hull_area)
+        area_2d = hull_2d.volume
+        self.feature.append(area_2d)
 
-        # get the hull shape index
-        hull_perimeter = hull_2d.area
-        shape_index = 1.0 * hull_area / hull_perimeter
-        self.feature.append(shape_index)
-
-        # obtain the point cluster near the top area
+        # 4. Linearity (from top cluster)
+        top = self.points[np.argmax(self.points[:, 2])].reshape(1, -1)
         k_top = max(int(len(self.points) * 0.005), 100)
-        idx = kd_tree_3d.query(top, k=k_top, return_distance=False)
-        idx = np.squeeze(idx, axis=0)
-        neighbours = self.points[idx, :]
-
-        # obtain the covariance matrix of the top points
+        idx = kd_tree.query(top, k=k_top, return_distance=False)
+        neighbours = self.points[np.squeeze(idx, axis=0)]
         cov = np.cov(neighbours.T)
-        w, _ = np.linalg.eig(cov)
-        w.sort()
+        w = np.sort(np.linalg.eigvals(cov))
+        linearity = (w[2] - w[1]) / (w[2] + 1e-5)
+        self.feature.append(linearity)
 
-        # calculate the linearity and sphericity
-        linearity = (w[2]-w[1]) / (w[2] + 1e-5)
-        sphericity = w[0] / (w[2] + 1e-5)
-        self.feature += [linearity, sphericity]
+
+
+
+    #
+    #     # calculate the height
+    #     height = np.amax(self.points[:, 2])
+    #     self.feature.append(height)
+    #
+    #     # get the root point and top point
+    #     root = self.points[[np.argmin(self.points[:, 2])]]
+    #     top = self.points[[np.argmax(self.points[:, 2])]]
+    #
+    #     # construct the 2D and 3D kd tree
+    #     kd_tree_2d = KDTree(self.points[:, :2], leaf_size=5)
+    #     kd_tree_3d = KDTree(self.points, leaf_size=5)
+    #
+    #     # # compute the root point planar density
+    #     radius_root = 0.4
+    #     count = kd_tree_2d.query_radius(root[:, :2], r=radius_root, count_only=True)
+    #     root_density = 1.0*count[0] / len(self.points)
+    #     self.feature.append(root_density)
+    #
+    #     # compute the 2D footprint and calculate its area
+    #     hull_2d = ConvexHull(self.points[:, :2])
+    #     hull_area = hull_2d.volume
+    #     self.feature.append(hull_area)
+    #
+    #     # global densitty
+    #     global_density = len(self.points) / (hull_area * height)
+    #     self.feature.append(global_density)
+    #
+    #     #Height Variance
+    #     height_variance = np.var(self.points[:, 2])
+    #     self.feature.append(height_variance)
+    #
+    #     # get the hull shape index
+    #     hull_perimeter = hull_2d.area
+    #     shape_index = 1.0 * hull_area / hull_perimeter
+    #     self.feature.append(shape_index)
+    #
+    #     # obtain the point cluster near the top area
+    #     k_top = max(int(len(self.points) * 0.005), 100)
+    #     idx = kd_tree_3d.query(top, k=k_top, return_distance=False)
+    #     idx = np.squeeze(idx, axis=0)
+    #     neighbours = self.points[idx, :]
+    #
+    #     # obtain the covariance matrix of the top points
+    #     cov = np.cov(neighbours.T)
+    #     w, _ = np.linalg.eig(cov)
+    #     w.sort()
+    #
+    #     # calculate the linearity and sphericity
+    #     linearity = (w[2]-w[1]) / (w[2] + 1e-5)
+    #     sphericity = w[0] / (w[2] + 1e-5)
+    #     self.feature += [linearity, sphericity]
+    #
+    #     # Measures how "vertical" the object is (poles score high)
+    #     z_mean = np.mean(self.points[:, 2])
+    #     verticality = np.sum(np.abs(self.points[:, 2] - z_mean)) / len(self.points)
+    #     self.feature.append(verticality)
+    #
+    #     # Captures flat surfaces (buildings/cars)
+    #     cov_all = np.cov(self.points.T)
+    #     eigvals_all = np.sort(np.linalg.eigvals(cov_all))
+    #     planarity = (eigvals_all[1] - eigvals_all[0]) / eigvals_all[2]
+    #     self.feature.append(planarity)
+    #
+    #     # Trees are bottom-heavy; poles are uniform
+    #     from scipy.stats import skew
+    #     height_skew = skew(self.points[:, 2])
+    #     self.feature.append(height_skew)
+
+
 
 
 def read_xyz(filenm):
@@ -186,21 +244,50 @@ def feature_visualization(X):
 
 
 def SVM_classification(X, y):
-    """
-    Conduct SVM classification
-        X: features
-        y: labels
-    """
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4)
-    clf = svm.SVC()
-    clf.fit(X_train, y_train)
-    y_preds = clf.predict(X_test)
-    acc = accuracy_score(y_test, y_preds)
-    print("SVM accuracy: %5.2f" % acc)
-    print("confusion matrix")
-    conf = confusion_matrix(y_test, y_preds)
-    print(conf)
+    # Split data (use random_state for reproducibility)
+    # Split data with stratification
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=0.4,
+        random_state=42,
+        stratify=y  # Preserve class distribution
+    )
 
+    # Check class distribution
+    class_counts = np.bincount(y)
+    print("Class distribution:", class_counts)
+
+    # Define parameter grid with class weighting
+    param_grid = {
+        'C': [0.1, 1, 10, 100],
+        'kernel': ['linear', 'rbf'],
+        'gamma': ['scale', 'auto', 0.1, 1],
+        'class_weight': ['balanced', None]  # Test both weighted and unweighted
+    }
+
+    # Use 5-fold stratified cross-validation
+    grid_search = GridSearchCV(
+        svm.SVC(),
+        param_grid,
+        cv=5,
+        verbose=1,
+        scoring='accuracy'
+    )
+    grid_search.fit(X_train, y_train)
+
+    # Get best model
+    best_svm = grid_search.best_estimator_
+    y_pred = best_svm.predict(X_test)
+
+    # Evaluation
+    print(f"\nBest parameters: {grid_search.best_params_}")
+    print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+    print("Classification Report:\n", classification_report(y_test, y_pred))
+    print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+
+    # Feature importance (for linear kernel)
+    if grid_search.best_params_['kernel'] == 'linear':
+        print("\nFeature coefficients:", best_svm.coef_)
 
 def RF_classification(X, y):
     """
@@ -208,26 +295,46 @@ def RF_classification(X, y):
         X: features
         y: labels
     """
-    # Split data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4, random_state=42)
+    # Split data with stratification
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y,
+        test_size=0.4,
+        random_state=42,
+        stratify=y  # Maintain class distribution
+    )
 
-    # Hyperparameter tuning
+    # Enhanced parameter grid
     param_grid = {
         'n_estimators': [50, 100, 200],
-        'max_depth': [None, 10, 20],
-        'max_features': ['sqrt', 'log2']
+        'max_depth': [None, 10, 20, 30],
+        'max_features': ['sqrt', 'log2', 0.3],
+        'min_samples_split': [2, 5, 10],
+        'min_samples_leaf': [1, 2, 4],
+        'class_weight': ['balanced', None]
     }
-    clf = GridSearchCV(RandomForestClassifier(), param_grid, cv=5)
+
+    # Use parallel processing (n_jobs=-1) for faster tuning
+    clf = GridSearchCV(
+        RandomForestClassifier(random_state=42),
+        param_grid,
+        cv=5,
+        n_jobs=-1,
+        verbose=1
+    )
     clf.fit(X_train, y_train)
 
-    # Evaluate
+    # Evaluation
     y_preds = clf.predict(X_test)
-    acc = accuracy_score(y_test, y_preds)
-    print("RF accuracy: %5.2f" % acc)
-    print("Best parameters:", clf.best_params_)
-    print("Confusion matrix:")
-    conf = confusion_matrix(y_test, y_preds)
-    print(conf)
+    print("\nBest parameters:", clf.best_params_)
+    print("Accuracy: %.2f" % accuracy_score(y_test, y_preds))
+    print("Classification Report:\n", classification_report(y_test, y_preds))
+    print("Confusion Matrix:\n", confusion_matrix(y_test, y_preds))
+
+    # Feature importance
+    importances = clf.best_estimator_.feature_importances_
+    print("\nTop Features:")
+    for i, imp in sorted(enumerate(importances), key=lambda x: x[1], reverse=True):
+        print(f"Feature {i}: {imp:.4f}")
 
 def learning_curve(X, y, classifier, train_sizes=np.linspace(0.1, 1.0, 10, endpoint=False)):
     """
@@ -272,7 +379,7 @@ def error_analysis(y_true, y_pred):
 
 if __name__=='__main__':
     # specify the data folder
-    path = "./pointclouds-500/"
+    path = DATASET_PATH
 
     # conduct feature preparation
     print('Start preparing features')
@@ -301,18 +408,3 @@ if __name__=='__main__':
     # Generate learning curve for RF
     print('Generating learning curve for RF')
     learning_curve(X, y, RandomForestClassifier(n_estimators=200, max_depth=None, max_features='sqrt'))
-
-# if __name__ == "__main__":
-#     # Load XYZ file (assuming it's space-separated)
-#     xyz_files = glob.glob(DATASET_PATH + "*.xyz")
-#
-#     if not xyz_files:
-#         print("No .xyz_files files found in the directory.")
-#         # return None
-#
-#     xyz_data = np.loadtxt(xyz_files[1])
-#
-#     # Access X, Y, Z columns separately
-#     x, y, z = xyz_data[:, 0], xyz_data[:, 1], xyz_data[:, 2]
-#
-#     print(x[:5], y[:5], z[:5])  # Print first 5 values
