@@ -47,10 +47,6 @@ class urban_object:
         """
         self.feature = [ FEATURES[f_name](self) for f_name in feature_names ]
 
-
-# =============================================================================================
-# Below are all 12 features we used.
-# =============================================================================================
 # height
 def cal_height(obj: urban_object):
     height = np.amax(obj.points[:, 2]) - np.amin(obj.points[:, 2])
@@ -147,6 +143,7 @@ def cal_sphericity(obj: urban_object):
 
     return w[0] / (w[2] + 1e-5)
 
+# multiscale entropy -removed from list, too computationally exhaustive.
 def cal_multi_scale_entropy(obj: urban_object):
 
     entropies = []
@@ -166,9 +163,7 @@ def cal_multi_scale_entropy(obj: urban_object):
 
     return np.mean(entropies)
 
-# =============================================================================================
-# Update this FEATURES dict when adding new feature.
-# =============================================================================================
+
 FEATURES: Dict[Literal[
     "height", 
     "hw_ratio", 
@@ -180,8 +175,7 @@ FEATURES: Dict[Literal[
     "shape_index", 
     "compactness",
     "linearity", 
-    "sphericity",
-    "multi_scale_entropy"
+    "sphericity"
 ], Callable[..., float]] = {
     "height": cal_height,
     "hw_ratio": cal_hw_ratio,
@@ -193,6 +187,5 @@ FEATURES: Dict[Literal[
     "shape_index": cal_shape_index,
     "compactness": cal_compactness,
     "linearity": cal_linearity,
-    "sphericity": cal_sphericity,
-    "multi_scale_entropy": cal_multi_scale_entropy
+    "sphericity": cal_sphericity
 }
