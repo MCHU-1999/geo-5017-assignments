@@ -1,6 +1,8 @@
 import numpy as np
 from urban_obj import urban_object, FEATURES
 from main import data_loading, feature_preparation
+from os.path import exists, join
+from os import mkdir
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -40,6 +42,10 @@ def between_class_scatter(X: np.ndarray, Y: np.ndarray, N=500):
     return Sb
 
 def plot_heatmap(matrix: np.ndarray[np.ndarray[np.float32]], plot_title: str):
+
+    if not exists("./feature_cov/"):
+        mkdir("./feature_cov/")
+
     feature_keys = list(FEATURES.keys())
 
     # Plot matrix

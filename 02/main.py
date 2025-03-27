@@ -8,7 +8,7 @@ from sklearn.manifold import TSNE
 from sklearn.decomposition import PCA
 from tqdm import tqdm
 from os.path import exists, join
-from os import listdir
+from os import listdir, mkdir
 from typing import Dict, Literal, Callable
 import itertools
 from urban_obj import urban_object
@@ -172,7 +172,8 @@ def SVM_classification(X, y):
 
     # Plot confusion matrix
     class_names = ['building', 'car', 'fence', 'pole', 'tree']
-    plot_confusion_matrix(y_test, y_pred, class_names, clf_name="Random Forest", save_path="./cm_test/rf_cm.png")
+    if not exists("./cm_test/"): mkdir("./cm_test/")
+    plot_confusion_matrix(y_test, y_pred, class_names, clf_name="Random Forest", save_path="./cm_test/svm_cm.png")
 
 
 def RF_classification(X, y):
@@ -218,6 +219,7 @@ def RF_classification(X, y):
 
     # Plot confusion matrix
     class_names = ['building', 'car', 'fence', 'pole', 'tree']
+    if not exists("./cm_test/"): mkdir("./cm_test/")
     plot_confusion_matrix(y_test, y_pred, class_names, clf_name="Random Forest", save_path="./cm_test/rf_cm.png")
 
 
