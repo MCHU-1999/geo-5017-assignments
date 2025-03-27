@@ -3,10 +3,9 @@ import numpy as np
 from sklearn import svm
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.metrics import hinge_loss
-from sklearn.metrics import log_loss
+from sklearn.metrics import accuracy_score, hinge_loss, log_loss, confusion_matrix
 from datetime import datetime
+import seaborn as sns
 
 def learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspace(0.1, 0.9, 9)):
     """
@@ -131,3 +130,27 @@ def learning_curve(X, y, classifier_type, param_set, test_sizes=np.linspace(0.1,
     print(f"{'Train Size':<15}{'Train Acc':<12}{'Test Acc':<12}{'Train Loss':<12}{'Test Loss':<12}{'Gap':<12}")
     print(f"{final_size:<15}{final_train_acc:<12.3f}{final_test_acc:<12.3f}"
           f"{final_train_loss:<12.3f}{final_test_loss:<12.3f}{final_gap:<12.3f}")
+
+def plot_confusion_matrix(y_true, y_pred, class_names, clf_name="Classifier", save_path="./cm_test.png"):
+     """
+     Plots the confusion matrix using seaborn's heatmap.
+ 
+     Args:
+         y_true: True labels.
+         y_pred: Predicted labels.
+         class_names: List of class names.
+         clf_name: Classifier name for the title.
+         save_path: Path to save the confusion matrix plot.
+     """
+     cm = confusion_matrix(y_true, y_pred)
+    #  accu = accuracy_score(y_true, y_pred)
+ 
+     plt.figure(figsize=(8, 8))
+     sns.heatmap(cm, annot=True, fmt="d", cmap="Purples", xticklabels=class_names, yticklabels=class_names)
+ 
+     plt.title(f"{clf_name}")
+     plt.ylabel("True Label")
+     plt.xlabel("Predicted Label")
+     plt.tight_layout()
+     plt.savefig(save_path)
+     plt.close()
