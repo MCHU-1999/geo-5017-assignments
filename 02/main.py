@@ -157,6 +157,8 @@ def SVM_classification(X, y):
 
     # Print predictions from different models
     print_param_table(param_grid, param_sets, predictions, y_test)
+    # LTT = generate_latex_table(param_grid, param_sets, predictions, y_test)
+    # print("\n", LTT)
 
     # Generate learning curve for best parameters
     print("\nGenerating learning curve for best parameters:")
@@ -173,7 +175,7 @@ def SVM_classification(X, y):
     # Plot confusion matrix
     class_names = ['building', 'car', 'fence', 'pole', 'tree']
     if not exists("./cm_test/"): mkdir("./cm_test/")
-    plot_confusion_matrix(y_test, y_pred, class_names, clf_name="Random Forest", save_path="./cm_test/svm_cm.png")
+    plot_confusion_matrix(y_test, y_pred, class_names, clf_name="SVM", save_path="./cm_test/svm_cm.png")
 
 
 def RF_classification(X, y):
@@ -189,6 +191,15 @@ def RF_classification(X, y):
         'criterion': ["gini", "entropy", "log_loss"],
         'class_weight': [None, 'balanced']
     }
+
+    # param_grid = {
+    #     'n_estimators': [50, 100, 200],
+    #     'max_features': ['sqrt', 4],
+    #     'criterion': ["gini", "entropy"],
+    #     'class_weight': [None, 'balanced'],
+    #     'bootstrap': [True],
+    #     'max_samples': [0.25, 0.5, 0.75, 1.0]
+    # }
     param_sets = [dict(zip(param_grid.keys(), values)) for values in itertools.product(*param_grid.values())]
 
     # Find best parameters
@@ -209,6 +220,8 @@ def RF_classification(X, y):
 
     # Print predictions from different models
     print_param_table(param_grid, param_sets, predictions, y_test)
+    # LTT = generate_latex_table(param_grid, param_sets, predictions, y_test)
+    # print("\n", LTT)
 
     # Generate learning curve for best parameters
     print("\nGenerating learning curve for best parameters:")
@@ -239,6 +252,10 @@ def generate_latex_table(param_grid: dict, param_sets: list[dict], predictions: 
     # Extract column names
     headers = list(param_grid.keys()) + ["accuracy"]
     
+    # Compute all accuracy scores
+    acc_values = [accuracy_score(gt, pred) for pred in predictions.values()]
+    max_acc = max(acc_values)  # Find the highest accuracy
+    
     # LaTeX table header
     latex_str = "\\begin{table}[h]\n"
     latex_str += "    \\centering\n"
@@ -248,9 +265,10 @@ def generate_latex_table(param_grid: dict, param_sets: list[dict], predictions: 
     latex_str += "        \\midrule\n"
     
     # Generate table rows
-    for params, pred in zip(param_sets, predictions.values()):
-        acc = accuracy_score(gt, pred)
-        row = " & ".join(str(params[key]) for key in param_grid.keys()) + f" & {acc:.4f}"
+    for params, pred, acc in zip(param_sets, predictions.values(), acc_values):
+        row_values = [str(params[key]) for key in param_grid.keys()]
+        acc_str = f"\\textbf{{{acc:.4f}}}" if acc == max_acc else f"{acc:.4f}"
+        row = " & ".join(row_values) + f" & {acc_str}"
         latex_str += f"        {row} \\\\\n"
     
     # Close table
